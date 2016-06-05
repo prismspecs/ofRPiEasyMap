@@ -1,10 +1,6 @@
-//
-//  surface.cpp
-//  testing
-//
-//  Created by Jargon Jargon on 6/4/16.
-//
-//
+/*
+ ofRPiEasyMap is a joint venture between Shobun Baile and Grayson Earle
+*/
 
 #include "surface.h"
 

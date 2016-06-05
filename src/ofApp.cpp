@@ -1,3 +1,7 @@
+/*
+ ofRPiEasyMap is a joint venture between Shobun Baile and Grayson Earle
+*/
+
 #include "ofApp.h"
 
 //--------------------------------------------------------------
