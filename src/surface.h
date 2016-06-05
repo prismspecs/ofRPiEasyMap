@@ -26,6 +26,11 @@ public:
     
     vector<ofVec2f> verts;
     ofTexture texture;
+    ofVideoPlayer videoTexture;
+    
+    // temporary
+    int textureWidth;
+    int textureHeight;
     
 };
 

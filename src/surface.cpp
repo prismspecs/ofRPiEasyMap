@@ -29,6 +29,17 @@ Surface::Surface() {
     // load in image
     ofLoadImage(texture, "checker.jpg");
     
+    // load in video
+    videoTexture.load("test.mov");
+    videoTexture.setLoopState(OF_LOOP_NORMAL);
+    videoTexture.play();
+    
+    // set texture width and height
+    // just manual for now, to switch between
+    // video and still image for testing
+    textureWidth = 640;
+    textureHeight = 360;
+    
     // determine how to divide quad into mesh
     updateVectors();
     
@@ -67,6 +78,9 @@ void Surface::updateVectors() {
 
 void Surface::update() {
     
+    // update video
+    videoTexture.update();
+    
     // diagnostics... just corner pin the bottom right to the mouse position for now
     corners[2].x = ofGetMouseX();
     corners[2].y = ofGetMouseY();
@@ -102,8 +116,8 @@ void Surface::draw() {
             
             // top left
             int whichVert = getVert(x, y);
-            float mappedX = float(x) / float(vertsX) * texture.getWidth();
-            float mappedY = float(y) / float(vertsY) * texture.getHeight();
+            float mappedX = float(x) / float(vertsX) * textureWidth;
+            float mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
@@ -111,16 +125,16 @@ void Surface::draw() {
             
             // top right
             whichVert = getVert(x + 1, y);
-            mappedX = float(x+1) / float(vertsX) * texture.getWidth();
-            mappedY = float(y) / float(vertsY) * texture.getHeight();
+            mappedX = float(x+1) / float(vertsX) * textureWidth;
+            mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
             
             // bottom right
             whichVert = getVert(x + 1, y + 1);
-            mappedX = float(x+1) / float(vertsX) * texture.getWidth();
-            mappedY = float(y+1) / float(vertsY) * texture.getHeight();
+            mappedX = float(x+1) / float(vertsX) * textureWidth;
+            mappedY = float(y+1) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
@@ -131,23 +145,29 @@ void Surface::draw() {
             
             // bottom left
             whichVert = getVert(x, y + 1);
-            mappedX = float(x) / float(vertsX) * texture.getWidth();
-            mappedY = float(y+1) / float(vertsY) * texture.getHeight();
+            mappedX = float(x) / float(vertsX) * textureWidth;
+            mappedY = float(y+1) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
             
             // top left again
             whichVert = getVert(x, y);
-            mappedX = float(x) / float(vertsX) * texture.getWidth();
-            mappedY = float(y) / float(vertsY) * texture.getHeight();
+            mappedX = float(x) / float(vertsX) * textureWidth;
+            mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
             
-            texture.bind();
+            // video texture
+            videoTexture.getTexture().bind();
             mesh.draw();
-            texture.unbind();
+            videoTexture.getTexture().unbind();
+            
+            // still image texture
+//            texture.bind();
+//            mesh.draw();
+//            texture.unbind();
             
             
             
