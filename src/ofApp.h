@@ -26,11 +26,6 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-    ofFbo fbo;
-    
-    int pMouseX;
-    int pMouseY;
-    
     vector<Surface> surfaces;  // array of surfaces
     
 };

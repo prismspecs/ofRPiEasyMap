@@ -7,8 +7,10 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     surfaces.push_back(Surface());
-    
+        
     ofBackground(0,0,0);
+    
+    ofSetVerticalSync(false);
 }
 
 //--------------------------------------------------------------
@@ -32,11 +34,20 @@ void ofApp::draw(){
         surfaces[i].draw();
 
     }
+    
+    ofDrawBitmapString("FPS: " + ofToString(ofGetFrameRate()), ofGetWidth() * .05, ofGetHeight() * .05);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    
+    // pass any key presses to active surface
+    for (int i=0; i<surfaces.size(); i++) {
+        
+        if(surfaces[i].active)
+            surfaces[i].keyPressed(key);
+        
+    }
 }
 
 //--------------------------------------------------------------

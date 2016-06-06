@@ -17,20 +17,27 @@ public:
     void update();
     void draw();
     int getVert(int x, int y);
+    void keyPressed(int key);
     
     int vertsX; // how many vertices length wise?
     int vertsY; // ..
-    int width;
-    int height;
-    ofVec2f corners[4];
     
-    vector<ofVec2f> verts;
+    vector<ofVec2f> verts;  // points in the mesh (vertsX * vertsY)
+    
+    // texture (still image or vid?)
+    int textureType;
     ofTexture texture;
     ofVideoPlayer videoTexture;
     
-    // temporary
+    // temporary, until we implement automatic switching based
+    // on which mode--video or still
     int textureWidth;
     int textureHeight;
+    
+    // corner pinning
+    ofVec2f corners[4];
+    bool active;        // is this particular surface active? (for pinning)
+    int activeCorner;    // which corner is currently selected (1-4) TL, TR, BR, BL
     
 };
 

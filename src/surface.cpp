@@ -1,16 +1,19 @@
 /*
  ofRPiEasyMap is a joint venture between Shobun Baile and Grayson Earle
-*/
+ */
 
 #include "surface.h"
 
 Surface::Surface() {
     
     // arbitrary starting properties
-    vertsX = 16;
-    vertsY = 16;
-    width = 400;
-    height = 400;
+    // VERTS IS VERY IMPORTANT for the RPi, I set to
+    // 6 and my FPS shot up to 60fps
+    vertsX = 12;
+    vertsY = 12;
+    textureType = 1;    //vid
+    active = true;
+    activeCorner = 2;   // bottom right
     
     // corners for pinning
     // top left
@@ -26,19 +29,29 @@ Surface::Surface() {
     corners[3].x = 10;
     corners[3].y = 700;
     
-    // load in image
-    ofLoadImage(texture, "checker.jpg");
+    switch(textureType) {
+        case 0:
+            // load in image
+            ofLoadImage(texture, "checker.jpg");
+            textureWidth = texture.getWidth();
+            textureHeight = texture.getHeight();
+            break;
+        case 1:
+            // load in video
+            videoTexture.load("hd.mov");
+            videoTexture.setLoopState(OF_LOOP_NORMAL);
+            videoTexture.play();
+            textureWidth = videoTexture.getWidth();
+            textureHeight = videoTexture.getHeight();
+            break;
+    }
     
-    // load in video
-    videoTexture.load("test.mov");
-    videoTexture.setLoopState(OF_LOOP_NORMAL);
-    videoTexture.play();
     
     // set texture width and height
     // just manual for now, to switch between
     // video and still image for testing
-    textureWidth = 640;
-    textureHeight = 360;
+    //textureWidth = 640;
+    //textureHeight = 360;
     
     // determine how to divide quad into mesh
     updateVectors();
@@ -78,12 +91,15 @@ void Surface::updateVectors() {
 
 void Surface::update() {
     
-    // update video
-    videoTexture.update();
+    // update video if that's the texture type
+    if(textureType == 1)
+        videoTexture.update();
     
-    // diagnostics... just corner pin the bottom right to the mouse position for now
-    corners[2].x = ofGetMouseX();
-    corners[2].y = ofGetMouseY();
+    // need to improve this mucho
+    if(active) {
+        corners[activeCorner].x = ofGetMouseX();
+        corners[activeCorner].y = ofGetMouseY();
+    }
     
 }
 
@@ -93,16 +109,19 @@ void Surface::draw() {
     ofSetColor(255);
     ofFill();
     
-    for(int i = 0; i < 4; i++)
-        ofDrawCircle(corners[i].x, corners[i].y, 5);
+    // if this is currently being pinned, draw corners
+    if(active)
+        for(int i = 0; i < 4; i++)
+            ofDrawCircle(corners[i].x, corners[i].y, 5);
     
     // draw vec array
     for(int y = 0; y < vertsY; y++) {
         for(int x = 0; x < vertsX; x++) {
             
+            
             // diagnostics... draw red verts
-            ofSetColor(255,0,0);
-            ofFill();
+            //ofSetColor(255,0,0);
+            //ofFill();
             //ofDrawCircle(verts[getVert(x, y)].x, verts[getVert(x, y)].y, 2);
             
             // set color to full white for texture to render un-tinted
@@ -120,8 +139,10 @@ void Surface::draw() {
             float mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
+            if(textureType == 0)
             mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
-            
+            if(textureType == 1)
+            mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             // top right
             whichVert = getVert(x + 1, y);
@@ -129,7 +150,10 @@ void Surface::draw() {
             mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
-            mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 0)
+                mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 1)
+                mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             // bottom right
             whichVert = getVert(x + 1, y + 1);
@@ -137,11 +161,17 @@ void Surface::draw() {
             mappedY = float(y+1) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
-            mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 0)
+                mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 1)
+                mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             // bottom right again
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
-            mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 0)
+                mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 1)
+                mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             // bottom left
             whichVert = getVert(x, y + 1);
@@ -149,7 +179,10 @@ void Surface::draw() {
             mappedY = float(y+1) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
-            mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 0)
+                mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 1)
+                mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             // top left again
             whichVert = getVert(x, y);
@@ -157,65 +190,48 @@ void Surface::draw() {
             mappedY = float(y) / float(vertsY) * textureHeight;
             
             mesh.addVertex(ofPoint(verts[whichVert].x, verts[whichVert].y));
-            mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
-            
-            // video texture
-            videoTexture.getTexture().bind();
-            mesh.draw();
-            videoTexture.getTexture().unbind();
-            
-            // still image texture
-//            texture.bind();
-//            mesh.draw();
-//            texture.unbind();
+            if(textureType == 0)
+                mesh.addTexCoord(texture.getCoordFromPoint(mappedX, mappedY));
+            if(textureType == 1)
+                mesh.addTexCoord(videoTexture.getTexture().getCoordFromPoint(mappedX, mappedY));
             
             
+            // bind texture depending on which type we're using
+            switch(textureType) {
+                case 0:
+                    // still image texture
+                    texture.bind();
+                    mesh.draw();
+                    texture.unbind();
+                    break;
+                case 1:
+                    // video texture
+                    videoTexture.getTexture().bind();
+                    mesh.draw();
+                    videoTexture.getTexture().unbind();
+                    break;
+            }
             
-            // old method, doesn't work on RPi
-//            texture.bind();
-//            glBegin(GL_QUADS);
-//            
-//            // top left
-//            int whichVert = getVert(x, y);
-//            float mappedX = float(x) / float(vertsX) * texture.getWidth();
-//            float mappedY = float(y) / float(vertsY) * texture.getHeight();
-//            
-//            glTexCoord2f(mappedX, mappedY);
-//            glVertex2f(verts[whichVert].x, verts[whichVert].y);
-//            
-//            // top right
-//            whichVert = getVert(x + 1, y);
-//            mappedX = float(x+1) / float(vertsX) * texture.getWidth();
-//            mappedY = float(y) / float(vertsY) * texture.getHeight();
-//            
-//            
-//            glTexCoord2f(mappedX, mappedY);
-//            glVertex2f(verts[whichVert].x, verts[whichVert].y);
-//            
-//            // bottom right
-//            whichVert = getVert(x + 1, y + 1);
-//            mappedX = float(x+1) / float(vertsX) * texture.getWidth();
-//            mappedY = float(y+1) / float(vertsY) * texture.getHeight();
-//            
-//            glTexCoord2f(mappedX, mappedY);
-//            glVertex2f(verts[whichVert].x, verts[whichVert].y);
-//            
-//            // bottom left
-//            whichVert = getVert(x, y + 1);
-//            mappedX = float(x) / float(vertsX) * texture.getWidth();
-//            mappedY = float(y+1) / float(vertsY) * texture.getHeight();
-//            
-//            glTexCoord2f(mappedX, mappedY);
-//            glVertex2f(verts[whichVert].x, verts[whichVert].y);
-//            
-//            glEnd();
-//            ofEndShape();
-//            texture.unbind();
-
         }
     }
 }
 
 int Surface::getVert(int x, int y) {
     return x + (y * (vertsX+1));
+}
+
+void Surface::keyPressed(int key) {
+    ofLog() << "the number is " << key;
+    
+    if(key == '1')
+        activeCorner = 0;
+    if(key == '2')
+        activeCorner = 1;
+    if(key == '3')
+        activeCorner = 2;
+    if(key == '4')
+        activeCorner = 3;
+    // for now, just stop pinning all corners w/ #5 on keyboard
+    if(key == '5')
+        active = !active;
 }
